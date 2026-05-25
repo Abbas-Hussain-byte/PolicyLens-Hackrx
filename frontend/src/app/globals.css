@@ -1,0 +1,475 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+
+  --color-blue-300: var(--blue-300);
+  --color-blue-400: var(--blue-400);
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+
+  --color-amber-300: var(--amber-300);
+  --color-amber-800: var(--amber-800);
+  --color-purple-300: var(--purple-300);
+  --color-purple-400: var(--purple-400);
+  --color-purple-800: var(--purple-800);
+  --color-green-400: var(--green-400);
+  --color-red-400: var(--red-400);
+  --color-red-800: var(--red-800);
+  --color-emerald-400: var(--emerald-400);
+  --color-emerald-800: var(--emerald-800);
+  --color-indigo-400: var(--indigo-400);
+
+  --color-purple-900: var(--purple-900);
+  --color-amber-900: var(--amber-900);
+  --color-emerald-900: var(--emerald-900);
+  --color-red-900: var(--red-900);
+}
+
+/* ─── Design Tokens ────────────────────────────────────────── */
+:root {
+  /* Brand Colors — Premium Insurance Blue/Cyan (Light Mode) */
+  --brand-50: #eff6ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+  --brand-800: #1e40af;
+  --brand-900: #1e3a8a;
+
+  /* Trust Colors */
+  --trust-high: #10b981;
+  --trust-medium: #f59e0b;
+  --trust-low: #ef4444;
+
+  /* Surfaces (Light Mode) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.8);
+
+  /* Text (Light Mode) */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Borders (Light Mode) */
+  --border-color: rgba(15, 23, 42, 0.08);
+  --border-glow: rgba(59, 130, 246, 0.25);
+
+  /* Gradients (Light Mode) */
+  --gradient-brand: linear-gradient(135deg, #2563eb, #7c3aed);
+  --gradient-hero: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #e2e8f0 100%);
+  --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+  --gradient-trust-high: linear-gradient(135deg, #10b981, #059669);
+  --gradient-trust-medium: linear-gradient(135deg, #f59e0b, #d97706);
+  --gradient-trust-low: linear-gradient(135deg, #ef4444, #dc2626);
+
+  /* Shadows (Light Mode) */
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.05);
+  --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.1);
+  --shadow-elevated: 0 12px 30px rgba(15, 23, 42, 0.08);
+
+  /* Animation */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Mapped Gray Scale (Light Mode) */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #475569;
+  --gray-500: #64748b;
+  --gray-600: #334155;
+  --gray-700: #1e293b;
+  --gray-800: #e2e8f0;
+  --gray-900: #0f172a;
+
+  /* Accent Mappings (Light Mode) */
+  --blue-300: #1d4ed8;
+  --blue-400: #2563eb;
+  --blue-500: #3b82f6;
+  --blue-600: #1d4ed8;
+  --amber-300: #b45309;
+  --amber-800: #fde68a;
+  --purple-300: #7e22ce;
+  --purple-400: #7e22ce;
+  --purple-800: #e9d5ff;
+  --green-400: #047857;
+  --red-400: #be123c;
+  --red-800: #fecaca;
+  --emerald-400: #047857;
+  --emerald-800: #a7f3d0;
+  --indigo-400: #4338ca;
+
+  --purple-900: #faf5ff;
+  --amber-900: #fffbeb;
+  --emerald-900: #ecfdf5;
+  --red-900: #fff5f5;
+}
+
+.dark {
+  /* Brand Colors — Premium Insurance Blue (Dark Mode) */
+  --brand-50: #eff6ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+  --brand-800: #1e40af;
+  --brand-900: #1e3a5f;
+
+  /* Surfaces (Dark Mode) */
+  --bg-primary: #0a0f1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --bg-card-hover: #1e293b;
+  --bg-glass: rgba(26, 34, 53, 0.7);
+
+  /* Text (Dark Mode) */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Borders (Dark Mode) */
+  --border-color: rgba(148, 163, 184, 0.12);
+  --border-glow: rgba(59, 130, 246, 0.3);
+
+  /* Gradients (Dark Mode) */
+  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gradient-hero: linear-gradient(135deg, #0a0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  --gradient-card: linear-gradient(145deg, rgba(26, 34, 53, 0.9), rgba(17, 24, 39, 0.9));
+
+  /* Shadows (Dark Mode) */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.15);
+  --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.4);
+
+  /* Mapped Gray Scale (Dark Mode) */
+  --gray-50: #0f172a;
+  --gray-100: #1e293b;
+  --gray-200: #334155;
+  --gray-300: #d1d5db;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #e2e8f0;
+  --gray-700: #f1f5f9;
+  --gray-800: #1f2937;
+  --gray-900: #ffffff;
+
+  /* Accent Mappings (Dark Mode) */
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --amber-300: #f59e0b;
+  --amber-800: #92400e;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-800: #6b21a8;
+  --green-400: #34d399;
+  --red-400: #f87171;
+  --red-800: #991b1b;
+  --emerald-400: #34d399;
+  --emerald-800: #065f46;
+  --indigo-400: #818cf8;
+
+  --purple-900: #581c87;
+  --amber-900: #78350f;
+  --emerald-900: #064e3b;
+  --red-900: #7f1d1d;
+}
+
+/* ─── Base Styles ──────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ─── Typography ───────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.25rem; }
+
+/* ─── Glass Card ───────────────────────────────────────────── */
+.glass-card {
+  background: var(--gradient-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s var(--ease-out-expo);
+}
+
+.glass-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* ─── Trust Badges ─────────────────────────────────────────── */
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.trust-badge.high {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.trust-badge.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.trust-badge.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ─── Action Cards ─────────────────────────────────────────── */
+.action-card {
+  padding: 24px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-brand);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.action-card:hover::before {
+  opacity: 1;
+}
+
+/* ─── Source Card ──────────────────────────────────────────── */
+.source-card {
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.source-card:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* ─── Chat Bubbles ─────────────────────────────────────────── */
+.chat-bubble-user {
+  background: var(--gradient-brand);
+  color: white;
+  border-radius: 20px 20px 4px 20px;
+  padding: 14px 20px;
+  max-width: 80%;
+  margin-left: auto;
+}
+
+.chat-bubble-ai {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px 20px 20px 4px;
+  padding: 18px 22px;
+  max-width: 90%;
+}
+
+/* ─── Upload Zone ──────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 20px;
+  padding: 48px;
+  text-align: center;
+  transition: all 0.3s var(--ease-out-expo);
+  cursor: pointer;
+}
+
+.upload-zone:hover,
+.upload-zone.active {
+  border-color: var(--brand-400);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+/* ─── Pulse Animation for Loading ──────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Skeleton Loading ─────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+  background-size: 2000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* ─── Button Styles ────────────────────────────────────────── */
+.btn-primary {
+  background: var(--gradient-brand);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-glow);
+  background: var(--bg-card-hover);
+}
+
+/* ─── Reading Mode Sizes ───────────────────────────────────── */
+.reading-simple {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+.reading-standard {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.reading-expert {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* ─── Mobile Responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.375rem; }
+
+  .glass-card {
+    border-radius: 12px;
+  }
+
+  .chat-bubble-user,
+  .chat-bubble-ai {
+    max-width: 92%;
+  }
+
+  .upload-zone {
+    padding: 32px 20px;
+  }
+}

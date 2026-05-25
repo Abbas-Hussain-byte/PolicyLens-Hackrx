@@ -2,3 +2,9 @@
 __pycache__/
 node_modules/
 uploads/
+backend/data/
+backend/.env
+frontend/.next/
+frontend/node_modules/
+*.pyc
+.DS_Store

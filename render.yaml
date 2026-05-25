@@ -1,0 +1,23 @@
+# Render Blueprint — PolicyLens AI Backend
+# Connect your GitHub repo to Render, and this file auto-configures deployment.
+
+services:
+  - type: web
+    name: policylens-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: CORS_ORIGINS
+        value: https://policylens.vercel.app,http://localhost:3000
+      - key: EMBEDDING_MODEL
+        value: text-embedding-004
+      - key: EMBEDDING_DIMENSION
+        value: "768"
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
