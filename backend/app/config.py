@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     # API Keys
     gemini_api_key: str = ""
+    groq_api_key: str = ""
 
     # Server
     host: str = "0.0.0.0"
@@ -26,9 +27,11 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-004"
     embedding_dimension: int = 768
     gemini_model: str = "gemini-2.0-flash"
+    groq_model: str = "llama-3.3-70b-versatile"
 
     # Rate limiting
     gemini_rpm: int = 15
+    groq_rpm: int = 30
     max_upload_size_mb: int = 20
 
     class Config:

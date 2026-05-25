@@ -1,7 +1,7 @@
 """Eligibility checker — determines if a condition/situation is covered."""
 
 from app.core.retriever import retriever, chunks_to_source_clauses
-from app.llm.gemini import generate_json
+from app.llm.groq import generate_json
 from app.llm.prompts import ELIGIBILITY_PROMPT, MULTILINGUAL_WRAPPER
 from app.models.schemas import (
     EligibilityRequest,

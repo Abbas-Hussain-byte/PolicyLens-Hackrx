@@ -142,6 +142,9 @@ export default function HomePage() {
   const [loadingFeature, setLoadingFeature] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [isEligibilityModalOpen, setIsEligibilityModalOpen] = useState(false);
+  const [eligibilityCondition, setEligibilityCondition] = useState("");
+  const [eligibilityDetails, setEligibilityDetails] = useState("");
 
   // Sync theme with document class list
   useEffect(() => {
@@ -269,15 +272,28 @@ export default function HomePage() {
   };
 
   // ─── Feature Handlers ────────────────────────────────────
-  const handleEligibility = async () => {
-    const condition = prompt(
-      "Enter the condition or situation to check eligibility for:"
-    );
-    if (!condition || !selectedPolicy) return;
+  const handleEligibility = () => {
+    if (!selectedPolicy) {
+      alert("Please upload or select a policy first");
+      return;
+    }
+    setIsEligibilityModalOpen(true);
+  };
+
+  const handleEligibilitySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!eligibilityCondition.trim() || !selectedPolicy) return;
+
+    setIsEligibilityModalOpen(false);
     setLoadingFeature("eligibility");
     setActiveView("eligibility");
     try {
-      const result = await checkEligibility(selectedPolicy, condition, "", language);
+      const result = await checkEligibility(
+        selectedPolicy,
+        eligibilityCondition,
+        eligibilityDetails,
+        language
+      );
       setEligibilityResult(result);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Check failed";
@@ -977,6 +993,92 @@ export default function HomePage() {
           PolicyLens AI · Insurance Intelligence Platform · Answers are AI-generated and should be verified with your insurance provider
         </p>
       </footer>
+
+      {/* ─── Eligibility Modal ──────────────────────────────── */}
+      <AnimatePresence>
+        {isEligibilityModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEligibilityModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6 shadow-2xl z-10"
+            >
+              <button
+                onClick={() => setIsEligibilityModalOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Check Eligibility</h3>
+                  <p className="text-xs text-gray-500">Verify coverage details for a condition</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleEligibilitySubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                    Condition / Treatment / Symptom
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={eligibilityCondition}
+                    onChange={(e) => setEligibilityCondition(e.target.value)}
+                    placeholder="e.g., Maternity, Dental Care, Diabetes"
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                    Additional Context (Optional)
+                  </label>
+                  <textarea
+                    value={eligibilityDetails}
+                    onChange={(e) => setEligibilityDetails(e.target.value)}
+                    placeholder="e.g., Pre-existing for 3 years, outpatient care, etc."
+                    rows={3}
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline-none focus:border-blue-500 transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEligibilityModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-[var(--border-color)] text-sm font-medium hover:bg-[var(--bg-primary)] transition-colors text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary !py-2.5 !px-5 text-sm"
+                  >
+                    Check Coverage
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

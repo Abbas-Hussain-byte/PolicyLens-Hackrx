@@ -48,9 +48,13 @@ def embed_texts(texts: list[str], batch_size: int = 100) -> np.ndarray:
         batch = texts[i:i + batch_size]
         logger.info(f"Embedding batch {i // batch_size + 1} ({len(batch)} texts)...")
 
+        contents = [
+            types.Content(parts=[types.Part.from_text(text=t)])
+            for t in batch
+        ]
         result = client.models.embed_content(
             model=settings.embedding_model,
-            contents=batch,
+            contents=contents,
             config=types.EmbedContentConfig(
                 task_type="RETRIEVAL_DOCUMENT",
                 output_dimensionality=settings.embedding_dimension,

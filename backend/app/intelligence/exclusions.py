@@ -1,7 +1,7 @@
 """Exclusions finder — extracts all exclusions, traps, and limitations."""
 
 from app.core.retriever import retriever, chunks_to_source_clauses
-from app.llm.gemini import generate_json
+from app.llm.groq import generate_json
 from app.llm.prompts import EXCLUSIONS_PROMPT
 from app.models.schemas import (
     ExclusionsResponse,
@@ -55,11 +55,18 @@ async def find_exclusions(policy_id: str) -> ExclusionsResponse:
 
     exclusions = []
     for exc in result.get("exclusions", []):
+        page_val = exc.get("page")
+        page_num = 0
+        if page_val is not None:
+            try:
+                page_num = int(page_val)
+            except (ValueError, TypeError):
+                page_num = 0
         exclusions.append(ExclusionItem(
             title=exc.get("title", ""),
             description=exc.get("description", ""),
             section=exc.get("section", ""),
-            page=exc.get("page", 0),
+            page=page_num,
             risk_note=exc.get("risk_note", ""),
         ))
 

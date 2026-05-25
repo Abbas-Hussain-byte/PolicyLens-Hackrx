@@ -5,7 +5,7 @@ only when uncertain. This keeps simple queries fast.
 """
 
 from app.models.schemas import QueryTier
-from app.llm.gemini import classify
+from app.llm.groq import classify
 from app.llm.prompts import ROUTER_PROMPT
 import re
 import logging

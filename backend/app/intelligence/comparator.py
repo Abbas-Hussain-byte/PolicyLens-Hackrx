@@ -1,7 +1,7 @@
 """Policy comparison engine — compares 2-4 policies side by side."""
 
 from app.core.retriever import retriever, chunks_to_source_clauses
-from app.llm.gemini import generate_json
+from app.llm.groq import generate_json
 from app.llm.prompts import COMPARISON_PROMPT, MULTILINGUAL_WRAPPER
 from app.models.schemas import (
     CompareRequest,

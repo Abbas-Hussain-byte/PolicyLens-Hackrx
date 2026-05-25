@@ -14,7 +14,7 @@ import time
 import json
 from app.intelligence.router import route_query
 from app.core.retriever import retriever, chunks_to_source_clauses
-from app.llm.gemini import generate_json, generate
+from app.llm.groq import generate_json, generate
 from app.llm.prompts import (
     ANSWER_ENGINE_PROMPT,
     FAST_INFO_PROMPT,
@@ -144,9 +144,16 @@ async def _handle_grounded(question: str, request: QueryRequest) -> QueryRespons
     llm_sources = result.get("source_references", [])
     if llm_sources:
         for src in llm_sources:
+            page_val = src.get("page")
+            page_num = 0
+            if page_val is not None:
+                try:
+                    page_num = int(page_val)
+                except (ValueError, TypeError):
+                    page_num = 0
             sources.append(SourceClause(
                 section_title=src.get("section", ""),
-                page_number=src.get("page", 0),
+                page_number=page_num,
                 text=src.get("quote", "")[:300],
                 relevance_score=0.0,
             ))
