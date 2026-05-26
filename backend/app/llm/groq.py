@@ -51,7 +51,7 @@ async def _rate_limit():
 
 async def generate(
     prompt: str,
-    temperature: float = 0.3,
+    temperature: float = None,
     max_tokens: int = 2048,
     json_mode: bool = True,
 ) -> str:
@@ -66,9 +66,10 @@ async def generate(
     Returns:
         Generated text string.
     """
+    temp = temperature if temperature is not None else settings.temperature
     if not settings.groq_api_key:
         logger.info("GROQ_API_KEY not set. Falling back to Gemini.")
-        return await gemini.generate(prompt, temperature, max_tokens, json_mode)
+        return await gemini.generate(prompt, temp, max_tokens, json_mode)
 
     await _rate_limit()
 
@@ -82,7 +83,8 @@ async def generate(
         "messages": [
             {"role": "user", "content": prompt}
         ],
-        "temperature": temperature,
+        "temperature": temp,
+        "top_p": settings.top_p,
         "max_tokens": max_tokens,
     }
 
@@ -101,7 +103,7 @@ async def generate(
                 logger.error(f"Groq API error (status {response.status_code}): {response.text}")
                 # Fallback to Gemini if Groq encounters a server error or rate limits
                 logger.warning("Groq API error. Falling back to Gemini.")
-                return await gemini.generate(prompt, temperature, max_tokens, json_mode)
+                return await gemini.generate(prompt, temp, max_tokens, json_mode)
 
             result_json = response.json()
             choices = result_json.get("choices", [])
@@ -114,7 +116,7 @@ async def generate(
     except Exception as e:
         logger.error(f"Groq API call exception: {e}. Falling back to Gemini.")
         try:
-            return await gemini.generate(prompt, temperature, max_tokens, json_mode)
+            return await gemini.generate(prompt, temp, max_tokens, json_mode)
         except Exception as gemini_err:
             logger.error(f"Gemini fallback failed: {gemini_err}")
             raise e
@@ -122,7 +124,7 @@ async def generate(
 
 async def generate_json(
     prompt: str,
-    temperature: float = 0.3,
+    temperature: float = None,
     max_tokens: int = 2048,
 ) -> dict:
     """Generate and parse JSON response from Groq with fallback to Gemini.

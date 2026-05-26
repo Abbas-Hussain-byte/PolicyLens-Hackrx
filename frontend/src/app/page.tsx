@@ -79,7 +79,7 @@ function SourceCard({
         <motion.p
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="mt-3 text-sm text-gray-300 leading-relaxed border-t border-blue-900/30 pt-3"
+          className="mt-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-blue-300/20 pt-3"
         >
           &ldquo;{source.text}&rdquo;
         </motion.p>
@@ -130,6 +130,7 @@ export default function HomePage() {
   const [policies, setPolicies] = useState<PolicyInfo[]>([]);
   const [selectedPolicy, setSelectedPolicy] = useState<string>("");
   const [activeView, setActiveView] = useState<string>("dashboard");
+  const [isLoadingPolicies, setIsLoadingPolicies] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -146,7 +147,7 @@ export default function HomePage() {
   const [eligibilityCondition, setEligibilityCondition] = useState("");
   const [eligibilityDetails, setEligibilityDetails] = useState("");
 
-  // Sync theme with document class list
+  // Sync theme, active policy, and active view with localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -157,7 +158,28 @@ export default function HomePage() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    const savedPolicy = localStorage.getItem("selectedPolicy");
+    const savedView = localStorage.getItem("activeView");
+    if (savedPolicy) setSelectedPolicy(savedPolicy);
+    if (savedView) setActiveView(savedView);
+
+    loadPolicies(savedPolicy || undefined);
   }, []);
+
+  // Save selectedPolicy to localStorage when it changes
+  useEffect(() => {
+    if (selectedPolicy) {
+      localStorage.setItem("selectedPolicy", selectedPolicy);
+    } else {
+      localStorage.removeItem("selectedPolicy");
+    }
+  }, [selectedPolicy]);
+
+  // Save activeView to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("activeView", activeView);
+  }, [activeView]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
@@ -170,20 +192,30 @@ export default function HomePage() {
     }
   };
 
-  // Load policies on mount
-  useEffect(() => {
-    loadPolicies();
-  }, []);
-
-  const loadPolicies = async () => {
+  const loadPolicies = async (preferPolicyId?: string) => {
+    setIsLoadingPolicies(true);
     try {
       const data = await listPolicies();
       setPolicies(data.policies);
-      if (data.policies.length > 0 && !selectedPolicy) {
-        setSelectedPolicy(data.policies[0].policy_id);
+      
+      const savedPolicy = preferPolicyId || localStorage.getItem("selectedPolicy");
+      if (data.policies.length > 0) {
+        if (savedPolicy && data.policies.some((p) => p.policy_id === savedPolicy)) {
+          setSelectedPolicy(savedPolicy);
+          localStorage.setItem("selectedPolicy", savedPolicy);
+        } else {
+          const firstId = data.policies[0].policy_id;
+          setSelectedPolicy(firstId);
+          localStorage.setItem("selectedPolicy", firstId);
+        }
+      } else {
+        setSelectedPolicy("");
+        localStorage.removeItem("selectedPolicy");
       }
     } catch {
       // Backend might not be running yet
+    } finally {
+      setIsLoadingPolicies(false);
     }
   };
 
@@ -202,8 +234,7 @@ export default function HomePage() {
       setTimeout(() => {
         setUploading(false);
         setUploadProgress("");
-        setSelectedPolicy(result.policy_id);
-        loadPolicies();
+        loadPolicies(result.policy_id);
         setActiveView("dashboard");
       }, 1000);
     } catch (err: unknown) {
@@ -320,8 +351,9 @@ export default function HomePage() {
     if (!confirm("Delete this policy?")) return;
     try {
       await deletePolicy(policyId);
-      if (selectedPolicy === policyId) setSelectedPolicy("");
-      loadPolicies();
+      const savedPolicy = localStorage.getItem("selectedPolicy");
+      const nextActiveId = (savedPolicy && savedPolicy !== policyId) ? savedPolicy : undefined;
+      loadPolicies(nextActiveId);
     } catch {
       alert("Failed to delete");
     }
@@ -471,7 +503,12 @@ export default function HomePage() {
               transition={{ duration: 0.3 }}
             >
               {/* Hero */}
-              {policies.length === 0 ? (
+              {isLoadingPolicies ? (
+                <div className="text-center py-20 flex flex-col items-center justify-center min-h-[300px]">
+                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading your policies...</p>
+                </div>
+              ) : policies.length === 0 ? (
                 <div className="text-center py-20">
                   <motion.div
                     initial={{ scale: 0.8 }}
@@ -523,7 +560,7 @@ export default function HomePage() {
                             </div>
                           </div>
                           {currentPolicy.summary && (
-                            <p className="text-gray-300 mt-3 pl-[52px]">
+                            <p className="text-gray-600 dark:text-gray-300 mt-3 pl-[52px]">
                               {currentPolicy.summary}
                             </p>
                           )}
@@ -557,8 +594,8 @@ export default function HomePage() {
                           {card.icon}
                         </div>
                         <h4 className="font-bold text-base mb-1">{card.title}</h4>
-                        <p className="text-sm text-gray-400">{card.desc}</p>
-                        <ArrowRight className="w-4 h-4 text-gray-600 absolute top-6 right-6 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{card.desc}</p>
+                        <ArrowRight className="w-4 h-4 text-gray-400 dark:text-gray-500 absolute top-6 right-6 group-hover:text-blue-600 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
                       </motion.div>
                     ))}
                   </div>
@@ -578,12 +615,12 @@ export default function HomePage() {
             >
               <button
                 onClick={() => setActiveView("dashboard")}
-                className="text-gray-400 hover:text-white mb-6 flex items-center gap-1 text-sm"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 flex items-center gap-1 text-sm transition-colors"
               >
                 ← Back to Dashboard
               </button>
               <h2 className="text-2xl font-bold mb-2">Upload Insurance Policy</h2>
-              <p className="text-gray-400 mb-8">
+              <p className="text-gray-600 dark:text-gray-400 mb-8">
                 Upload a PDF and our AI will analyze every clause, coverage detail,
                 and exclusion in seconds.
               </p>
@@ -647,7 +684,7 @@ export default function HomePage() {
             >
               <button
                 onClick={() => setActiveView("dashboard")}
-                className="text-gray-400 hover:text-white mb-4 flex items-center gap-1 text-sm"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-4 flex items-center gap-1 text-sm transition-colors"
               >
                 ← Back to Dashboard
               </button>
@@ -674,7 +711,7 @@ export default function HomePage() {
                         {msg.isLoading ? (
                           <div className="flex items-center gap-3">
                             <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
-                            <span className="text-gray-400">Analyzing policy clauses...</span>
+                            <span className="text-gray-500 dark:text-gray-400">Analyzing policy clauses...</span>
                           </div>
                         ) : (
                           <div>
@@ -691,7 +728,7 @@ export default function HomePage() {
                                     score={msg.response.confidence.overall}
                                   />
                                   {msg.response.verification_status && (
-                                    <span className="text-xs bg-purple-900/30 text-purple-300 px-2 py-1 rounded-lg border border-purple-800/30">
+                                    <span className="text-xs bg-purple-800/20 text-purple-300 px-2 py-1 rounded-lg border border-purple-300/20">
                                       ✓ {msg.response.verification_status}
                                     </span>
                                   )}
@@ -702,13 +739,12 @@ export default function HomePage() {
 
                                 {/* Ambiguity Warning */}
                                 {msg.response.ambiguity?.found && (
-                                  <div className="bg-amber-900/15 border border-amber-800/30 rounded-xl p-3">
-                                    <div className="flex items-center gap-2 text-amber-300 text-sm font-medium mb-1">
-                                      <AlertTriangle className="w-4 h-4" /> Ambiguity
-                                      Detected
+                                  <div className="bg-amber-800/15 border border-amber-300/20 rounded-xl p-3">
+                                    <div className="flex items-center gap-2 text-amber-300 text-sm font-semibold mb-1">
+                                      <AlertTriangle className="w-4 h-4" /> Ambiguity Detected
                                     </div>
                                     {msg.response.ambiguity.details.map((d, i) => (
-                                      <p key={i} className="text-xs text-amber-200/70 ml-6">
+                                      <p key={i} className="text-xs text-amber-300/90 font-medium ml-6">
                                         • {d}
                                       </p>
                                     ))}
@@ -773,7 +809,7 @@ export default function HomePage() {
             >
               <button
                 onClick={() => setActiveView("dashboard")}
-                className="text-gray-400 hover:text-white mb-6 flex items-center gap-1 text-sm"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 flex items-center gap-1 text-sm transition-colors"
               >
                 ← Back to Dashboard
               </button>
@@ -784,25 +820,25 @@ export default function HomePage() {
               {loadingFeature === "eligibility" ? (
                 <div className="glass-card p-12 text-center">
                   <Loader2 className="w-10 h-10 text-blue-400 mx-auto animate-spin mb-4" />
-                  <p className="text-gray-400">Analyzing policy clauses for eligibility...</p>
+                  <p className="text-gray-500 dark:text-gray-400">Analyzing policy clauses for eligibility...</p>
                 </div>
               ) : eligibilityResult ? (
                 <div className="space-y-4">
                   <div className="glass-card p-6">
                     <div className="flex items-center gap-3 mb-4">
                       {eligibilityResult.eligible === true && (
-                        <div className="w-12 h-12 rounded-xl bg-emerald-900/30 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-800/20 flex items-center justify-center">
                           <CheckCircle2 className="w-7 h-7 text-emerald-400" />
                         </div>
                       )}
                       {eligibilityResult.eligible === false && (
-                        <div className="w-12 h-12 rounded-xl bg-red-900/30 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-red-800/20 flex items-center justify-center">
                           <X className="w-7 h-7 text-red-400" />
                         </div>
                       )}
                       {eligibilityResult.eligible === null && (
-                        <div className="w-12 h-12 rounded-xl bg-amber-900/30 flex items-center justify-center">
-                          <AlertTriangle className="w-7 h-7 text-amber-400" />
+                        <div className="w-12 h-12 rounded-xl bg-amber-800/20 flex items-center justify-center">
+                          <AlertTriangle className="w-7 h-7 text-amber-300" />
                         </div>
                       )}
                       <div>
@@ -819,7 +855,7 @@ export default function HomePage() {
                         />
                       </div>
                     </div>
-                    <p className="text-gray-300 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       {eligibilityResult.explanation}
                     </p>
                     {eligibilityResult.waiting_period && (
@@ -831,10 +867,10 @@ export default function HomePage() {
 
                   {eligibilityResult.conditions.length > 0 && (
                     <div className="glass-card p-5">
-                      <h4 className="font-medium text-sm text-gray-400 mb-3">Conditions</h4>
+                      <h4 className="font-medium text-sm text-gray-500 dark:text-gray-400 mb-3">Conditions</h4>
                       <ul className="space-y-2">
                         {eligibilityResult.conditions.map((c, i) => (
-                          <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                          <li key={i} className="text-gray-600 dark:text-gray-300 text-sm flex items-start gap-2">
                             <span className="text-blue-400 mt-0.5">•</span> {c}
                           </li>
                         ))}
@@ -872,25 +908,25 @@ export default function HomePage() {
             >
               <button
                 onClick={() => setActiveView("dashboard")}
-                className="text-gray-400 hover:text-white mb-6 flex items-center gap-1 text-sm"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 flex items-center gap-1 text-sm transition-colors"
               >
                 ← Back to Dashboard
               </button>
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <AlertTriangle className="w-7 h-7 text-amber-400" /> Policy Exclusions &
+                <AlertTriangle className="w-7 h-7 text-amber-300" /> Policy Exclusions &
                 Traps
               </h2>
 
               {loadingFeature === "exclusions" ? (
                 <div className="glass-card p-12 text-center">
-                  <Loader2 className="w-10 h-10 text-amber-400 mx-auto animate-spin mb-4" />
-                  <p className="text-gray-400">Scanning for exclusions and hidden traps...</p>
+                  <Loader2 className="w-10 h-10 text-amber-300 mx-auto animate-spin mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">Scanning for exclusions and hidden traps...</p>
                 </div>
               ) : exclusionsResult ? (
                 <div className="space-y-4">
                   <div className="glass-card p-4 flex items-center justify-between">
-                    <span className="text-gray-300">
-                      Found <strong className="text-amber-400">{exclusionsResult.total}</strong>{" "}
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Found <strong className="text-amber-300">{exclusionsResult.total}</strong>{" "}
                       exclusions
                     </span>
                     <ConfidenceBadge
@@ -907,16 +943,16 @@ export default function HomePage() {
                       className="glass-card p-5"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-amber-900/30 flex items-center justify-center shrink-0 mt-0.5">
-                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                        <div className="w-8 h-8 rounded-lg bg-amber-800/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertTriangle className="w-4 h-4 text-amber-300" />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-base mb-1">{exc.title}</h4>
-                          <p className="text-gray-300 text-sm leading-relaxed">
+                          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                             {exc.description}
                           </p>
                           {exc.risk_note && (
-                            <p className="mt-2 text-amber-300/80 text-xs bg-amber-900/10 rounded-lg p-2">
+                            <p className="mt-2 text-amber-300/90 text-xs bg-amber-800/15 rounded-lg p-2 font-medium">
                               ⚠️ {exc.risk_note}
                             </p>
                           )}
@@ -944,7 +980,7 @@ export default function HomePage() {
             >
               <button
                 onClick={() => setActiveView("dashboard")}
-                className="text-gray-400 hover:text-white mb-6 flex items-center gap-1 text-sm"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 flex items-center gap-1 text-sm transition-colors"
               >
                 ← Back to Dashboard
               </button>
@@ -955,7 +991,7 @@ export default function HomePage() {
               {policies.length < 2 ? (
                 <div className="glass-card p-12 text-center">
                   <Scale className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Upload at least 2 policies to compare.</p>
+                  <p className="text-gray-600 dark:text-gray-400">Upload at least 2 policies to compare.</p>
                   <button
                     onClick={() => setActiveView("upload")}
                     className="btn-primary mt-4"
@@ -965,7 +1001,7 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="glass-card p-6 text-center">
-                  <p className="text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-400">
                     Select policies to compare from the bar above, then use the chat
                     to ask comparison questions.
                   </p>

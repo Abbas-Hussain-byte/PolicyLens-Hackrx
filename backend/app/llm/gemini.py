@@ -57,7 +57,7 @@ async def _rate_limit():
 
 async def generate(
     prompt: str,
-    temperature: float = 0.3,
+    temperature: float = None,
     max_tokens: int = 2048,
     json_mode: bool = True,
 ) -> str:
@@ -72,12 +72,14 @@ async def generate(
     Returns:
         Generated text string.
     """
+    temp = temperature if temperature is not None else settings.temperature
     await _rate_limit()
 
     client = _get_client()
 
     config = types.GenerateContentConfig(
-        temperature=temperature,
+        temperature=temp,
+        top_p=settings.top_p,
         max_output_tokens=max_tokens,
     )
 
@@ -105,7 +107,7 @@ async def generate(
 
 async def generate_json(
     prompt: str,
-    temperature: float = 0.3,
+    temperature: float = None,
     max_tokens: int = 2048,
 ) -> dict:
     """Generate and parse JSON response from Gemini.

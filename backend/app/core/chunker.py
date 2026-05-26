@@ -12,6 +12,7 @@ Each chunk carries metadata for source citation.
 import re
 from dataclasses import dataclass, field
 from app.core.parser import ParsedDocument, PageText
+from app.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -57,9 +58,9 @@ TYPE_PATTERNS = {
 def chunk_document(
     document: ParsedDocument,
     policy_id: str = "",
-    max_chunk_size: int = 500,
-    min_chunk_size: int = 80,
-    overlap_words: int = 40,
+    max_chunk_size: int = None,
+    min_chunk_size: int = None,
+    overlap_words: int = None,
 ) -> list[Chunk]:
     """Chunk a parsed document using smart strategies.
 
@@ -75,6 +76,10 @@ def chunk_document(
     Returns:
         List of Chunk objects with metadata.
     """
+    max_chunk_w = max_chunk_size if max_chunk_size is not None else int(settings.chunk_size / 6)
+    overlap_w = overlap_words if overlap_words is not None else int(settings.chunk_overlap / 6)
+    min_chunk_w = min_chunk_size if min_chunk_size is not None else int(max_chunk_w * 0.15)
+
     # Build page-to-text mapping for source tracking
     page_texts = {p.page_number: p.text for p in document.pages}
     full_text = document.full_text
@@ -84,12 +89,12 @@ def chunk_document(
         return []
 
     # Try section-based chunking first
-    chunks = _section_based_chunking(full_text, page_texts, max_chunk_size, min_chunk_size)
+    chunks = _section_based_chunking(full_text, page_texts, max_chunk_w, min_chunk_w)
 
     # Fallback to sliding window if section chunking produces too few chunks
     if len(chunks) < 3:
         logger.info(f"Section chunking produced {len(chunks)} chunks, using sliding window")
-        chunks = _sliding_window_chunking(full_text, page_texts, max_chunk_size, overlap_words)
+        chunks = _sliding_window_chunking(full_text, page_texts, max_chunk_w, overlap_w)
 
     # Assign metadata to all chunks
     for i, chunk in enumerate(chunks):

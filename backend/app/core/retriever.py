@@ -8,6 +8,7 @@ from rank_bm25 import BM25Okapi
 from app.core.embedder import embed_query
 from app.storage.faiss_store import faiss_store
 from app.models.schemas import SourceClause
+from app.config import settings
 import logging
 import re
 
@@ -30,7 +31,7 @@ class HybridRetriever:
         self,
         query: str,
         policy_id: str,
-        top_k: int = 5,
+        top_k: int = None,
         semantic_weight: float = 0.6,
         keyword_weight: float = 0.4,
     ) -> list[tuple[dict, float]]:
@@ -46,8 +47,9 @@ class HybridRetriever:
         Returns:
             List of (chunk_metadata, relevance_score) tuples, sorted by relevance.
         """
+        k = top_k if top_k is not None else settings.top_k_retrieval
         # Fetch more candidates than needed, then fuse
-        fetch_k = min(top_k * 3, 20)
+        fetch_k = min(k * 3, 20)
 
         # 1. Semantic search via FAISS
         query_vec = embed_query(query)
@@ -63,7 +65,7 @@ class HybridRetriever:
         )
 
         # Return top_k
-        return fused[:top_k]
+        return fused[:k]
 
     def retrieve_for_comparison(
         self,

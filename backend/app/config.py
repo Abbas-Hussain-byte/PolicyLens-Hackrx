@@ -29,6 +29,13 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.0-flash"
     groq_model: str = "llama-3.3-70b-versatile"
 
+    # LLM & Retrieval Parameters
+    temperature: float = 0.1
+    top_p: float = 0.8
+    top_k_retrieval: int = 5
+    chunk_size: int = 900
+    chunk_overlap: int = 150
+
     # Rate limiting
     gemini_rpm: int = 15
     groq_rpm: int = 30

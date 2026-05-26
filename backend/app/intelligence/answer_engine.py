@@ -22,6 +22,7 @@ from app.llm.prompts import (
     SIMPLIFIER_PROMPT,
     MULTILINGUAL_WRAPPER,
     AMBIGUITY_PROMPT,
+    QUERY_REWRITER_PROMPT,
 )
 from app.models.schemas import (
     QueryRequest,
@@ -78,6 +79,20 @@ async def process_query(request: QueryRequest) -> QueryResponse:
     return response
 
 
+async def _rewrite_query(question: str) -> str:
+    """Rewrite conversational user queries into retrieval-friendly search terms."""
+    try:
+        prompt = QUERY_REWRITER_PROMPT.format(question=question)
+        rewritten = await generate(prompt, temperature=0.1, json_mode=False, max_tokens=100)
+        rewritten = rewritten.strip()
+        if rewritten:
+            logger.info(f"Query rewritten: '{question}' -> '{rewritten}'")
+            return rewritten
+    except Exception as e:
+        logger.warning(f"Failed to rewrite query: {e}")
+    return question
+
+
 async def _handle_fast_info(question: str, request: QueryRequest) -> QueryResponse:
     """Tier 1: Fast informational — no retrieval needed."""
     prompt = FAST_INFO_PROMPT.format(question=question)
@@ -110,8 +125,11 @@ async def _handle_fast_info(question: str, request: QueryRequest) -> QueryRespon
 
 async def _handle_grounded(question: str, request: QueryRequest) -> QueryResponse:
     """Tier 2: Grounded Q&A — retrieval + single LLM pass."""
-    # Retrieve relevant chunks
-    results = retriever.retrieve(question, request.policy_id, top_k=5)
+    # Rewrite user query into optimized search terms
+    search_query = await _rewrite_query(question)
+    
+    # Retrieve relevant chunks using search terms
+    results = retriever.retrieve(search_query, request.policy_id, top_k=5)
 
     if not results:
         return _no_evidence_response()
@@ -198,8 +216,9 @@ async def _handle_verified(question: str, request: QueryRequest) -> QueryRespons
     if not grounded.answer or grounded.confidence.overall < 0.2:
         return grounded  # Don't verify garbage
 
-    # Run verification pass
-    results = retriever.retrieve(question, request.policy_id, top_k=7)
+    # Run verification pass using search terms
+    search_query = await _rewrite_query(question)
+    results = retriever.retrieve(search_query, request.policy_id, top_k=7)
     chunks_text = _format_chunks(results)
 
     verify_prompt = VERIFIER_PROMPT.format(
