@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     db_path: str = "./data/policylens.db"
 
     # Models
-    embedding_model: str = "text-embedding-004"
+    embedding_model: str = "gemini-embedding-2"
     embedding_dimension: int = 768
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash"
     groq_model: str = "llama-3.3-70b-versatile"
 
     # LLM & Retrieval Parameters
